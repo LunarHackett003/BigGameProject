@@ -16,7 +16,8 @@ namespace Starlight
         [SerializeField] float currentLeanAngle;
         [SerializeField] float leanBounds, leanSpeed;
         [SerializeField] float lookPitchClamp = 75;
-
+        [SerializeField] float leanInput;
+        float leanDampVelocity;
         [SerializeField, Space(10), Header("Movement")] Vector2 moveInput;
         [SerializeField] Vector2 dampedMovement;
         Vector2 dampVelocity;
@@ -32,6 +33,7 @@ namespace Starlight
         {
             dampedMovement = Vector2.SmoothDamp(dampedMovement, moveInput, ref dampVelocity, movementRampSpeed);
             transform.Translate(moveSpeedMultiplier * Time.fixedDeltaTime * new Vector3(dampedMovement.x, 0, dampedMovement.y), Space.Self);
+            currentLeanAngle = Mathf.SmoothDamp(currentLeanAngle, leanInput * leanBounds, ref leanDampVelocity, leanSpeed);
         }
 
         public void ManagedLateUpdate()
@@ -49,7 +51,16 @@ namespace Starlight
         {
 
         }
-        
+
+        public void GetLeanInput(InputAction.CallbackContext context)
+        {
+            if (context.performed)
+            {
+                float val = context.ReadValue<float>();
+                //If we're already leaning this way, we want to un-lean
+                leanInput = leanInput == val ? 0 : val;
+            }
+        }
         public void GetMoveInput(InputAction.CallbackContext context)
         {
             moveInput = context.ReadValue<Vector2>();

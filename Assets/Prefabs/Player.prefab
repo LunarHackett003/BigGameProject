@@ -1596,13 +1596,14 @@ MonoBehaviour:
   lookSpeed: {x: 10, y: 10}
   lookAngle: {x: 0, y: 0}
   currentLeanAngle: 0
-  leanBounds: 0
-  leanSpeed: 0
+  leanBounds: 30
+  leanSpeed: 0.2
   lookPitchClamp: 75
+  leanInput: 0
   moveInput: {x: 0, y: 0}
   dampedMovement: {x: 0, y: 0}
   movementRampSpeed: 0.1
-  moveSpeedMultiplier: 1
+  moveSpeedMultiplier: 3
 --- !u!114 &7210388941158463904
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1705,6 +1706,22 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: f336c2bc-8a78-4683-abca-6afd0fd43dea
     m_ActionName: UI/TrackedDeviceOrientation
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 7841697204784184519}
+        m_TargetAssemblyTypeName: Starlight.CharacterMotor, Assembly-CSharp
+        m_MethodName: GetLeanInput
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 38068b2b-1412-49a9-8666-344af54d4c46
+    m_ActionName: Player/Lean[/Keyboard/e,/Keyboard/q]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
