@@ -1,5 +1,5 @@
 {
-    "name": "EscapeFromUnity",
+    "name": "InputMapping",
     "maps": [
         {
             "name": "Player",
@@ -19,7 +19,7 @@
                     "type": "Value",
                     "id": "161b57ed-473d-4530-b12d-3d321737dfe9",
                     "expectedControlType": "Vector2",
-                    "processors": "",
+                    "processors": "InvertVector2(invertX=false)",
                     "interactions": "",
                     "initialStateCheck": true
                 },
