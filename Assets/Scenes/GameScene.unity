@@ -2793,7 +2793,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1231353516}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!20 &1231353518
 Camera:
   m_ObjectHideFlags: 0
@@ -4238,16 +4238,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 2477912802697457310, guid: ed3d186dcd48a7c41bf5f2a984d97e58,
-        type: 3}
-      propertyPath: m_Weight
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3988864827307610242, guid: ed3d186dcd48a7c41bf5f2a984d97e58,
-        type: 3}
-      propertyPath: m_Weight
-      value: 0.244
-      objectReference: {fileID: 0}
     - target: {fileID: 4179594922441990704, guid: ed3d186dcd48a7c41bf5f2a984d97e58,
         type: 3}
       propertyPath: m_RootOrder
@@ -4302,16 +4292,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7720540088599802907, guid: ed3d186dcd48a7c41bf5f2a984d97e58,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0.0005
-      objectReference: {fileID: 0}
-    - target: {fileID: 8251999472222424147, guid: ed3d186dcd48a7c41bf5f2a984d97e58,
-        type: 3}
-      propertyPath: m_Weight
-      value: 0.628
       objectReference: {fileID: 0}
     - target: {fileID: 8252887612496825822, guid: ed3d186dcd48a7c41bf5f2a984d97e58,
         type: 3}
