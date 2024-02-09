@@ -34,6 +34,7 @@ namespace Starlight.Weapons
         public VisualEffect vfxMuzzleFlash;
 
         CharacterMotor cm;
+        public float CM_Focus { get { return cm.Focus; } }
         [SerializeField] MinMaxVector3 linearRecoilMinMax, angularRecoilMinMax;
         [SerializeField] Vector3 linearRecoilMin, linearRecoilMax, angularRecoilMin, angularRecoilMax;
         public virtual void ManagedFixedUpdate()
@@ -64,7 +65,6 @@ namespace Starlight.Weapons
         }
         public void Fire()
         {
-            print("fired");
             if (useVFXGraph && vfxMuzzleFlash)
             {
                 vfxMuzzleFlash.Play();

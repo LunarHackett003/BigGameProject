@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class Clamping
+public static class MathExtensions
 {
     public static Vector2 ClampThis(this Vector2 value, Vector2 min, Vector2 max)
     {
@@ -18,5 +18,13 @@ public static class Clamping
             value.x.ClampThis(min.x, max.x),
             value.y.ClampThis(min.y, max.y),
             value.z.ClampThis(min.z, max.z));
+    }
+    public static Vector2 ScaleReturn(this Vector2 value, Vector2 scale)
+    {
+        return new Vector2(value.x * scale.x, value.y * scale.y);
+    }
+    public static Vector3 ScaleReturn(this Vector3 value, Vector3 scale)
+    {
+        return new Vector3(value.x * scale.x, value.y * scale.y, value.z * scale.z);
     }
 }
