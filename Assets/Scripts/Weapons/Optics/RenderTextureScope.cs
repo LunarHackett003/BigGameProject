@@ -62,7 +62,7 @@ namespace Starlight.Weapons.Optics
         {
             
             int size = trueResolution;
-            crt = new(size,size, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
+            crt = new(size,size, RenderTextureFormat.RGB111110Float, RenderTextureReadWrite.Default);
             cam.targetTexture = crt;
             crt.updateMode = CustomRenderTextureUpdateMode.OnDemand;
             crt.Create();
