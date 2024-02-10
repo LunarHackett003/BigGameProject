@@ -219,7 +219,7 @@ Camera:
   m_ShutterSpeed: 0.005
   m_Aperture: 16
   m_FocusDistance: 10
-  m_FocalLength: 40
+  m_FocalLength: 20.7845
   m_BladeCount: 5
   m_Curvature: {x: 2, y: 11}
   m_BarrelClipping: 0.25
@@ -234,7 +234,7 @@ Camera:
     height: 1
   near clip plane: 0.01
   far clip plane: 999
-  field of view: 33.39849
+  field of view: 60.000263
   orthographic: 0
   orthographic size: 5
   m_Depth: -100
@@ -362,9 +362,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cam: {fileID: 5972892572794899186}
   rend: {fileID: 1804364102561313405}
-  mat: {fileID: 2100000, guid: 02cfba61892682f4d9004a9633246137, type: 2}
+  mat: {fileID: 2100000, guid: edffe8dd6983293438aff91b98795262, type: 2}
   crt: {fileID: 0}
   scopeResolution: 3
   trueResolution: 1024
   manualUpdate: 0
   useFixedUpdate: 0
+  zoomLevel: 2
+  defaultFocalLength: 20.7845
+  baseZoomAmount: 1

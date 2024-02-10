@@ -15,6 +15,8 @@ namespace Starlight.Weapons
 
         }
 
+        [SerializeField] AnimationContainer animContainer;
+        internal AnimationContainer AnimContainer { get { return animContainer; } }
         bool fireInput;
         public void SetFireInput(bool fireInput)
         {
@@ -26,6 +28,11 @@ namespace Starlight.Weapons
         [SerializeField] float preFireDelayTime;
         bool fireBlocked;
         bool firing;
+        int timesFired;
+        [SerializeField, Tooltip("How many times the weapon will be fired when pressing the trigger. Used for semi-automatic weapons by setting this to 1.")] int burstCount;
+        [SerializeField] float timeBetweenBursts;
+        [SerializeField, Tooltip("How many times the weapon can be fired before having to manually cycle the weapon. Useful for guns such as the quad-tube shotgun or something")] int shotsBeforeManualAction;
+        [SerializeField, Tooltip("Whether or not the weapon has to be manually reset before it can fire again. Useful for bolt- and pump-action weapons.")] bool manualAction;
         WaitForSeconds wfs;
         public AudioSource gunshotSource;
         public AudioClip gunShotClip;
@@ -34,6 +41,7 @@ namespace Starlight.Weapons
         public VisualEffect vfxMuzzleFlash;
 
         CharacterMotor cm;
+        public CharacterMotor CM {  get { return cm; } }
         public float CM_Focus { get { return cm.Focus; } }
         [SerializeField] MinMaxVector3 linearRecoilMinMax, angularRecoilMinMax;
         [SerializeField] Vector3 linearRecoilMin, linearRecoilMax, angularRecoilMin, angularRecoilMax;
@@ -50,10 +58,16 @@ namespace Starlight.Weapons
                     }
                     else
                     {
-                        Fire();
+                        CheckFire();
                     }
                 }
             }
+        }
+
+        internal void PerformManualAction()
+        {
+            fireDelay = false;
+            timesFired = 0;
         }
         public virtual void ManagedLateUpdate()
         {
@@ -63,7 +77,36 @@ namespace Starlight.Weapons
         {
 
         }
-        public void Fire()
+        void CheckFire()
+        {
+            if(burstCount > 0)
+            {
+                StartCoroutine(BurstFire());
+            }
+            else
+            {
+                Fire();
+            }
+        }
+        IEnumerator BurstFire()
+        {
+            WaitForFixedUpdate wff = new();
+            wfs = new(postFireDelayTime);
+            for (int i = 0; i < burstCount; i++)
+            {
+                Fire();
+                yield return wfs;
+            }
+            yield return new WaitForSeconds(timeBetweenBursts);
+            while (fireInput)
+            {
+                yield return wff;
+            }
+            firing = false;
+            yield break;
+        }
+
+        void Fire()
         {
             if (useVFXGraph && vfxMuzzleFlash)
             {
@@ -80,9 +123,17 @@ namespace Starlight.Weapons
             {
                 cm.ReceiveRecoilImpulse(linearRecoilMinMax, angularRecoilMinMax);
             }
-            StartCoroutine(PostFireDelay());
+            if (manualAction && timesFired >= shotsBeforeManualAction)
+            {
+                Debug.Log("Waiting for manual action!");
+                fireDelay = true;
+            }
+            else
+            {
+                StartCoroutine(PostFireDelay());
+            }
         }
-        public IEnumerator PostFireDelay()
+        IEnumerator PostFireDelay()
         {
             wfs = new(postFireDelayTime);
             fireDelay = true;
@@ -90,20 +141,25 @@ namespace Starlight.Weapons
             fireDelay = false;
             yield break;
         }
-        public IEnumerator PreFireDelay()
+        IEnumerator PreFireDelay()
         {
             firing = true;
             WaitForFixedUpdate wff = new();
-            WaitForSeconds wfs = new WaitForSeconds(preFireDelayTime);
+            WaitForSeconds wfs = new(preFireDelayTime);
             yield return wfs;
             //We should fire here, regardless of if the player has released the trigger or not 
-            Fire();
+                CheckFire();
+            if(burstCount > 0)
+            {
+                firing = false;
+                yield return null;
+            }
             yield return this.wfs;
             while (fireInput && !fireBlocked)
             {
                 yield return wff;
                 if (canFire)
-                    Fire();
+                    CheckFire();
                 //If canFire is true, we'll fire again, and keep doing that till we either cant shoot anymore or 
             }
             yield return this.wfs;

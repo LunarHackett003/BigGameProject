@@ -19,6 +19,8 @@ namespace Starlight
         [SerializeField, Header("Aiming")] Vector2 lookInput;
         [SerializeField] Vector2 lookSpeed;
         [SerializeField] Vector2 lookAngle;
+        [SerializeField] Vector2 aimRecoilInfluence;
+        [SerializeField] Vector2 aimRecoilMultiplier;
         [SerializeField] float currentLeanAngle;
         [SerializeField] float leanBounds, leanSpeed;
         [SerializeField] float lookPitchClamp = 75;
@@ -65,12 +67,21 @@ namespace Starlight
         [SerializeField, Tooltip("Should the bob update do the maths in fixed update and then lerp in late update?")] bool bobUseFixedUpdate;
         [SerializeField, Range(-5, 5)] float bobRecoilInfluence;
         [SerializeField, Range(-5, 5)] float bobSwayInfluence;
+        [SerializeField] Vector3 bobSpeedMoveMultLinear, bobSpeedMoveMultAngular;
 
         [SerializeField, Header("Focusing")] CinemachineVirtualCamera playerCam;
         bool focusInput;
         [SerializeField] float currentFocus, focusSpeed, unfocusedFOV, focusedFOV;
         [SerializeField] Transform focusCameraTarget, focusCameraReceiver;
         [SerializeField] float focusInAnimationSpeedMultiplier = 1, focusOutAnimationSpeedMultiplier = 1;
+        [SerializeField] float zoomLevel;
+        [SerializeField] float zoomAimSlowingCoefficient;
+        float zoomAimSlow;
+        public void SetZoomLevel(float zoomLevel)
+        {
+            this.zoomLevel = zoomLevel;
+            zoomAimSlow = zoomLevel * zoomAimSlowingCoefficient;
+        }
         public void SetFocusTarget(Transform target)
         {
             focusCameraTarget = target;
@@ -108,15 +119,16 @@ namespace Starlight
         }
         void ArmsBobbingMaths()
         {
+            float moveInfluence = moveInputSize + stationaryBobPower;
             timeLinear = new Vector2()
             {
-                x = Mathf.Sin(Time.time * linearBobSpeed.x),
-                y = Mathf.Cos(Time.time * linearBobSpeed.y)
+                x = Mathf.Sin(Time.time * linearBobSpeed.x * Mathf.Lerp(1, bobSpeedMoveMultLinear.x, moveInfluence)),
+                y = Mathf.Cos(Time.time * linearBobSpeed.y * Mathf.Lerp(1, bobSpeedMoveMultLinear.y, moveInfluence))
             };
             timeAngular = new Vector2()
             {
-                x = Mathf.Sin(Time.time * angularBobSpeed.x),
-                y = Mathf.Cos(Time.time * angularBobSpeed.y)
+                x = Mathf.Sin(Time.time * angularBobSpeed.x * Mathf.Lerp(1, bobSpeedMoveMultLinear.x, moveInfluence)),
+                y = Mathf.Cos(Time.time * angularBobSpeed.y * Mathf.Lerp(1, bobSpeedMoveMultLinear.x, moveInfluence))
             };
             float delta = bobUseFixedUpdate ? Time.fixedDeltaTime : Time.smoothDeltaTime;
             float focuslerp = Mathf.Lerp(1, bobFocusMultiplier, currentFocus);
@@ -166,10 +178,11 @@ namespace Starlight
         {
 
             aimRotationTransform.position = aimRotationAnchor.position;
-            lookAngle += lookInput * lookSpeed * Time.fixedDeltaTime;
+            lookAngle += (lookInput * Time.fixedDeltaTime * lookSpeed) / Mathf.Lerp(1, 1 + (zoomLevel * zoomAimSlowingCoefficient), currentFocus);
             lookAngle.y = Mathf.Clamp(lookAngle.y, -lookPitchClamp, lookPitchClamp);
+            aimRecoilInfluence = currentAngularRecoil * aimRecoilMultiplier;
             lookDelta = oldLook - lookAngle;
-            aimRotationTransform.localRotation = Quaternion.Euler(lookAngle.y, 0, 0);
+            aimRotationTransform.localRotation = Quaternion.Euler(Mathf.Clamp(lookAngle.y + aimRecoilInfluence.x, -lookPitchClamp, lookPitchClamp), aimRecoilInfluence.y , 0);
             aimRotationTransform.localRotation *= Quaternion.Euler(0, 0, currentLeanAngle);
             transform.localRotation = Quaternion.Euler(0, lookAngle.x, 0);
             lookAngle.x %= 360;

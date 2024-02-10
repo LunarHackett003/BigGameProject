@@ -16,6 +16,10 @@ namespace Starlight.Weapons.Optics
         [SerializeField] int trueResolution;
         [SerializeField] bool manualUpdate;
         [SerializeField] bool useFixedUpdate;
+
+        [SerializeField, Header("Zoom"), Range(1, 20)] float zoomLevel;
+        [SerializeField] float defaultFocalLength;
+        [SerializeField] int baseZoomAmount;
         public void ManagedFixedUpdate()
         {
             if(useFixedUpdate && manualUpdate)
@@ -33,6 +37,7 @@ namespace Starlight.Weapons.Optics
             {
                 crt.Update();
             }
+            cam.focalLength = defaultFocalLength * (baseZoomAmount * zoomLevel);
         }
 
         public void ManagedUpdate()
@@ -48,15 +53,24 @@ namespace Starlight.Weapons.Optics
             {
                 mainTexture = crt
             };
-
+        }
+        private void Start()
+        {
+            bw.CM.SetZoomLevel(zoomLevel * baseZoomAmount);
         }
         private void OnValidate()
         {
-            if (Application.isPlaying)
+            if (!Application.isPlaying)
             {
-                CreateCRT();
+                trueResolution = (int)System.Math.Pow(2, scopeResolution) * 128;
             }
-            trueResolution = (int)System.Math.Pow(2, scopeResolution) * 128;
+            else
+            {
+                if (bw.CM)
+                {
+                    bw.CM.SetZoomLevel(zoomLevel * baseZoomAmount);
+                }
+            }
         }
         void CreateCRT()
         {

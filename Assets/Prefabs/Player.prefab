@@ -1873,6 +1873,8 @@ MonoBehaviour:
   lookInput: {x: 0, y: -0}
   lookSpeed: {x: 10, y: 10}
   lookAngle: {x: 71.99869, y: 24.000015}
+  aimRecoilInfluence: {x: 0, y: 0}
+  aimRecoilMultiplier: {x: 2, y: 1}
   currentLeanAngle: -1.53e-43
   leanBounds: 30
   leanSpeed: 0.2
@@ -1918,6 +1920,8 @@ MonoBehaviour:
   bobUseFixedUpdate: 1
   bobRecoilInfluence: 0
   bobSwayInfluence: 0
+  bobSpeedMoveMultLinear: {x: 0, y: 0, z: 0}
+  bobSpeedMoveMultAngular: {x: 0, y: 0, z: 0}
   playerCam: {fileID: 7478878254160513367}
   currentFocus: 0
   focusSpeed: 4
@@ -1927,6 +1931,8 @@ MonoBehaviour:
   focusCameraReceiver: {fileID: 7720540088599802907}
   focusInAnimationSpeedMultiplier: 4
   focusOutAnimationSpeedMultiplier: 1
+  zoomLevel: 1
+  zoomAimSlowingCoefficient: 0.5
 --- !u!114 &7210388941158463904
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3369,6 +3375,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1573808128288209739}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 982ff95ae8325fb40b01ae1c3097f974,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7974130961433574831}
   m_SourcePrefab: {fileID: 100100000, guid: 982ff95ae8325fb40b01ae1c3097f974, type: 3}
 --- !u!4 &193501291283252006 stripped
 Transform:
@@ -3931,6 +3941,19 @@ MonoBehaviour:
     spineStiffness: 0.5
     pullBodyVertical: 0.5
     pullBodyHorizontal: 0
+--- !u!114 &7974130961433574831
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3389382510751713547}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad70f8c839c3d9a4695ed5f3c9534cd1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  wm: {fileID: 2245321396166766138}
 --- !u!4 &3574701362540211377 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1320411542853409003, guid: 982ff95ae8325fb40b01ae1c3097f974,
@@ -4041,16 +4064,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 9117898653679410865}
     m_Modifications:
-    - target: {fileID: 207395285715121043, guid: c596d5d2107d22a4eaed426ba86e2de5,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.0392
-      objectReference: {fileID: 0}
-    - target: {fileID: 207395285715121043, guid: c596d5d2107d22a4eaed426ba86e2de5,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0.1171
-      objectReference: {fileID: 0}
     - target: {fileID: 7110972792367202145, guid: c596d5d2107d22a4eaed426ba86e2de5,
         type: 3}
       propertyPath: m_RootOrder
