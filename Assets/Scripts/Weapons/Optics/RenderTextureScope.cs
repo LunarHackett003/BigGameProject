@@ -17,9 +17,9 @@ namespace Starlight.Weapons.Optics
         [SerializeField] bool manualUpdate;
         [SerializeField] bool useFixedUpdate;
 
-        [SerializeField, Header("Zoom"), Range(1, 20)] float zoomLevel;
-        [SerializeField] float defaultFocalLength;
-        [SerializeField] int baseZoomAmount;
+        [SerializeField, Header("Zoom"), Range(1, 20)] float zoomLevel = 2;
+        [SerializeField] float defaultFocalLength = 20.7845f;
+        [SerializeField] int baseZoomAmount = 1;
         public void ManagedFixedUpdate()
         {
             if(useFixedUpdate && manualUpdate)
@@ -56,6 +56,9 @@ namespace Starlight.Weapons.Optics
         }
         private void Start()
         {
+        }
+        private void OnEnable()
+        {
             bw.CM.SetZoomLevel(zoomLevel * baseZoomAmount);
         }
         private void OnValidate()
@@ -66,9 +69,10 @@ namespace Starlight.Weapons.Optics
             }
             else
             {
-                if (bw.CM)
+                if (bw && bw.cm)
                 {
                     bw.CM.SetZoomLevel(zoomLevel * baseZoomAmount);
+                    bw.CM.wm.SetVariables();
                 }
             }
         }

@@ -1918,10 +1918,10 @@ MonoBehaviour:
   moveBasedPositionAdditive: {x: 0.01, y: 0, z: 0.02}
   moveBasedRotationAdditive: {x: 1, y: 1, z: -2}
   bobUseFixedUpdate: 1
-  bobRecoilInfluence: 0
-  bobSwayInfluence: 0
-  bobSpeedMoveMultLinear: {x: 0, y: 0, z: 0}
-  bobSpeedMoveMultAngular: {x: 0, y: 0, z: 0}
+  bobRecoilInfluence: 1.05
+  bobSwayInfluence: 0.51
+  bobSpeedMoveMultLinear: {x: 1, y: 1, z: 1}
+  bobSpeedMoveMultAngular: {x: 1, y: 1, z: 1}
   playerCam: {fileID: 7478878254160513367}
   currentFocus: 0
   focusSpeed: 4
@@ -2079,6 +2079,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 2da789bf-04a0-4933-9af8-0d7a0b01d3f8
     m_ActionName: Player/Focus[/Mouse/rightButton]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 7841697204784184519}
+        m_TargetAssemblyTypeName: Starlight.CharacterMotor, Assembly-CSharp
+        m_MethodName: GetSwitchInput
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 1808b630-4c45-4602-b95d-a703096f87ed
+    m_ActionName: Player/Switch[/Keyboard/v]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -2098,6 +2114,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weapons:
   - {fileID: 2292312226670351276}
+  - {fileID: 0}
   weaponIndex: 0
 --- !u!1 &8477021894255188874
 GameObject:

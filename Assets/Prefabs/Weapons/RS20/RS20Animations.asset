@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fa513e32a6c5e3148b98dda68a6aa0cf, type: 3}
-  m_Name: AR5Animations
+  m_Name: RS20Animations
   m_EditorClassIdentifier: 
   clipList:
   - name: Idle
-    clip: {fileID: 7400000, guid: 3390499236590a940883f4a7c4c77ac5, type: 2}
+    clip: {fileID: 7400000, guid: 3d8c370864fa82a43872070c708f12ac, type: 2}
   - name: ADS
-    clip: {fileID: 7400000, guid: 73f7aa20fdfe48840b8c6e35134f69b4, type: 2}
+    clip: {fileID: 7400000, guid: 43dde92f547b3744faa7dcc76f8195eb, type: 2}
   - name: Fire_Hip
-    clip: {fileID: 7400000, guid: bc0eaef468263f546b14576695aea7d6, type: 2}
+    clip: {fileID: 7400000, guid: 6a8e0add41a0d1b4d9c70eb7fd692bb5, type: 2}
   - name: Fire_ADS
-    clip: {fileID: 7400000, guid: ad58195645f692e44b1c8c1979a8df2c, type: 2}
+    clip: {fileID: 7400000, guid: d8ecab9063308554087cb0ebbd5fe153, type: 2}
   - name: Equip
-    clip: {fileID: 7400000, guid: e1fc5b50f7c6c9a478ea84b43d67c206, type: 2}
+    clip: {fileID: 7400000, guid: 604ceb8e48aebf240864755e21322a6a, type: 2}
   - name: Unequip
-    clip: {fileID: 7400000, guid: f03cbdbeef9178d42bc0ac054c8510b4, type: 2}
+    clip: {fileID: 7400000, guid: 00439fc850803704081165be4fb51ad6, type: 2}

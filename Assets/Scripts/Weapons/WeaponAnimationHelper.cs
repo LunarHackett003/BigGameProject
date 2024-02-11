@@ -15,5 +15,9 @@ namespace Starlight.Weapons
         {
             wm.SwitchWeapon();
         }
+        public void PerformManualAction()
+        {
+            wm.CurrentWeapon.PerformManualAction();
+        }
     }
 }

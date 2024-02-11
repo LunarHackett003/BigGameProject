@@ -581,6 +581,23 @@ MonoBehaviour:
   useVFXGraph: 0
   muzzleFlash: {fileID: 5302089273346041110}
   vfxMuzzleFlash: {fileID: 0}
+  linearBobSpeed: {x: 1, y: 2, z: 1}
+  angularBobSpeed: {x: 2, y: 1, z: 1}
+  linearBobMultiplier: {x: 0.01, y: 0.01, z: 0.01}
+  angularBobMultiplier: {x: 1, y: 1, z: 1}
+  recoilLerpSpeed: 15
+  recoilDecay: 5
+  idleBobLerpSpeedLinear: 0.5
+  idleBobLerpSpeedAngular: 0.5
+  movingBobLerpSpeedLinear: 7
+  movingBobLerpSpeedAngular: 7
+  idleBobLerpScaleLinear: 0.5
+  movingBobLerpScaleLinear: 1
+  idleBobLerpScaleAngular: 0.5
+  movingBobLerpScaleAngular: 1
+  bobFocusMultiplier: 0.5
+  adsSpeed: 4
+  focusTransform: {fileID: 9067351802948617724}
   linearRecoilMin: {x: -0.01, y: 0, z: 0.02}
   linearRecoilMax: {x: 0.01, y: 0, z: 0.03}
   angularRecoilMin: {x: -3, y: -0.2, z: -1}

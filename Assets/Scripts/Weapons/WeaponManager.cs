@@ -35,6 +35,7 @@ namespace Starlight.Weapons
                 weapons[i].gameObject.SetActive(false);
             }
             weapons[weaponIndex].gameObject.SetActive(true);
+            SetVariables();
         }
         private void Start()
         {
@@ -68,6 +69,27 @@ namespace Starlight.Weapons
             weaponIndex %= weapons.Count;
             weapons[weaponIndex].gameObject.SetActive(true);
             SetAnimations();
+            SetVariables();
+        }
+        internal void SetVariables()
+        {
+            cm.SetFocusSpeed(CurrentWeapon.FocusSpeed);
+            cm.focusCameraTarget = CurrentWeapon.focusTransform;
+            cm.linearBobMultiplier = CurrentWeapon.linearBobMultiplier;
+            cm.angularBobMultiplier = CurrentWeapon.angularBobMultiplier;
+            cm.linearBobSpeed = CurrentWeapon.linearBobSpeed;
+            cm.angularBobSpeed = CurrentWeapon.angularBobSpeed;
+            cm.recoilDecay = CurrentWeapon.recoilDecay;
+            cm.recoilLerpSpeed = CurrentWeapon.recoilLerpSpeed;
+            cm.idleBobLerpSpeedLinear = CurrentWeapon.idleBobLerpSpeedLinear;
+            cm.idleBobLerpSpeedAngular = CurrentWeapon.idleBobLerpSpeedAngular;
+            cm.movingBobLerpSpeedLinear = CurrentWeapon.movingBobLerpSpeedLinear;
+            cm.movingBobLerpSpeedAngular = CurrentWeapon.movingBobLerpSpeedAngular;
+            cm.movingBobLerpScaleLinear = CurrentWeapon.movingBobLerpScaleLinear;
+            cm.movingBobLerpScaleAngular = CurrentWeapon.movingBobLerpScaleAngular;
+            cm.idleBobLerpScaleLinear = CurrentWeapon.idleBobLerpScaleLinear;
+            cm.idleBobLerpScaleAngular = CurrentWeapon.idleBobLerpScaleAngular;
+            cm.bobFocusMultiplier = CurrentWeapon.bobFocusMultiplier;
         }
         internal void SetAnimations()
         {

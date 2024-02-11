@@ -11,7 +11,7 @@ namespace Starlight
     {
 
 
-        [SerializeField] WeaponManager wm;
+        [SerializeField] internal WeaponManager wm;
 
         [SerializeField] Transform aimRotationTransform;
         [SerializeField] Transform aimRotationAnchor;
@@ -31,6 +31,7 @@ namespace Starlight
         Vector2 dampVelocity;
         [SerializeField] float movementRampSpeed; 
         [SerializeField] Vector2 moveSpeedMultiplier;
+        
 
         [SerializeField, Header("Look Sway")] Transform lookSwayTransform;
         [SerializeField] float lookSwayLerpSpeed;
@@ -45,8 +46,8 @@ namespace Starlight
         [SerializeField, Header("View Recoil")] float globalRecoilMultiplier;
         [SerializeField] float recoilRotationMultiplier;
         [SerializeField] float recoilTranslationMultiplier;
-        [SerializeField] float recoilLerpSpeed;
-        [SerializeField] float recoilDecay;
+        [SerializeField] internal float recoilLerpSpeed;
+        [SerializeField] internal float recoilDecay;
         Vector3 currentLinearRecoil, currentAngularRecoil;
         Vector3 linearRecoilTarget, angularRecoilTarget;
         [SerializeField] Vector3 linearRecoilClamp, angularRecoilClamp;
@@ -54,25 +55,30 @@ namespace Starlight
         [SerializeField] float movementAnimDampTime;
 
         [SerializeField, Header("Arms Bobbing")] Transform armBobbingTransform;
-        [SerializeField] Vector3 linearBobSpeed, angularBobSpeed;
+        [SerializeField] internal Vector3 linearBobSpeed, angularBobSpeed;
         Vector3 timeAngular, timeLinear;
-        [SerializeField] Vector3 linearBobMultiplier, angularBobMultiplier;
+        [SerializeField] internal Vector3 linearBobMultiplier, angularBobMultiplier;
         [SerializeField] Vector3 currentLinearBob, currentAngularBob;
         [SerializeField] float linearBobLerpSpeed, angularBobLerpSpeed;
         [SerializeField] float stationaryBobPower;
         [SerializeField] float bobTransformLeanMultiplier;
-        [SerializeField] float bobFocusMultiplier;
+        [SerializeField] internal float bobFocusMultiplier;
         [SerializeField, Tooltip("An additive position based on the positive movement direction for x and y input. Inverted for negative inputs.")] Vector3 moveBasedPositionAdditive, moveBasedRotationAdditive;
         Vector3 movementAddPos, movementAddRot;
         [SerializeField, Tooltip("Should the bob update do the maths in fixed update and then lerp in late update?")] bool bobUseFixedUpdate;
         [SerializeField, Range(-5, 5)] float bobRecoilInfluence;
         [SerializeField, Range(-5, 5)] float bobSwayInfluence;
-        [SerializeField] Vector3 bobSpeedMoveMultLinear, bobSpeedMoveMultAngular;
+        [SerializeField] internal float idleBobLerpSpeedLinear, idleBobLerpSpeedAngular, movingBobLerpSpeedLinear, movingBobLerpSpeedAngular, idleBobLerpScaleLinear, movingBobLerpScaleLinear, idleBobLerpScaleAngular, movingBobLerpScaleAngular;
+        float linearAngle, angularAngle;
 
         [SerializeField, Header("Focusing")] CinemachineVirtualCamera playerCam;
         bool focusInput;
         [SerializeField] float currentFocus, focusSpeed, unfocusedFOV, focusedFOV;
-        [SerializeField] Transform focusCameraTarget, focusCameraReceiver;
+        internal void SetFocusSpeed(float speed)
+        {
+            focusSpeed = speed;
+        }
+        [SerializeField] internal Transform focusCameraTarget, focusCameraReceiver;
         [SerializeField] float focusInAnimationSpeedMultiplier = 1, focusOutAnimationSpeedMultiplier = 1;
         [SerializeField] float zoomLevel;
         [SerializeField] float zoomAimSlowingCoefficient;
@@ -102,6 +108,7 @@ namespace Starlight
         { get { return animator; } }
         public float Focus { get { return currentFocus; } }
         float moveInputSize;
+        [SerializeField] float cameraBobMultiplier;
         private void Awake()
         {
             BehaviourManager.fixedUpdateClients += ManagedFixedUpdate;
@@ -116,26 +123,31 @@ namespace Starlight
             if (bobUseFixedUpdate)
                 ArmsBobbingMaths();
             currentFocus = Mathf.Clamp01(currentFocus + Time.fixedDeltaTime * focusSpeed * (focusInput ? 1 : -1));
+            animator.SetFloat("Focus", currentFocus);
         }
         void ArmsBobbingMaths()
         {
             float moveInfluence = moveInputSize + stationaryBobPower;
+            float movingBobScaleLerp = Mathf.Lerp(idleBobLerpScaleLinear, movingBobLerpScaleLinear, moveInfluence);
+            float movingBobAngularScaleLerp = Mathf.Lerp(idleBobLerpScaleAngular, movingBobLerpScaleAngular, moveInfluence);
+            linearAngle += Time.fixedDeltaTime * Mathf.Lerp(idleBobLerpSpeedLinear, movingBobLerpSpeedLinear, moveInfluence);
+            angularAngle += Time.fixedDeltaTime * Mathf.Lerp(idleBobLerpSpeedAngular, movingBobLerpSpeedAngular, moveInfluence);
             timeLinear = new Vector2()
             {
-                x = Mathf.Sin(Time.time * linearBobSpeed.x * Mathf.Lerp(1, bobSpeedMoveMultLinear.x, moveInfluence)),
-                y = Mathf.Cos(Time.time * linearBobSpeed.y * Mathf.Lerp(1, bobSpeedMoveMultLinear.y, moveInfluence))
+                x = Mathf.Sin(linearAngle * linearBobSpeed.x) * movingBobScaleLerp,
+                y = Mathf.Cos(linearAngle* linearBobSpeed.y) * movingBobScaleLerp
             };
             timeAngular = new Vector2()
             {
-                x = Mathf.Sin(Time.time * angularBobSpeed.x * Mathf.Lerp(1, bobSpeedMoveMultLinear.x, moveInfluence)),
-                y = Mathf.Cos(Time.time * angularBobSpeed.y * Mathf.Lerp(1, bobSpeedMoveMultLinear.x, moveInfluence))
+                x = Mathf.Sin(angularAngle * angularBobSpeed.x) *  movingBobAngularScaleLerp,
+                y = Mathf.Cos(angularAngle * angularBobSpeed.y) * movingBobAngularScaleLerp
             };
             float delta = bobUseFixedUpdate ? Time.fixedDeltaTime : Time.smoothDeltaTime;
             float focuslerp = Mathf.Lerp(1, bobFocusMultiplier, currentFocus);
             movementAddPos = moveBasedPositionAdditive.ScaleReturn(new Vector3(dampedMovement.x, 0, dampedMovement.y));
-            movementAddRot = moveBasedRotationAdditive.ScaleReturn(new Vector3(dampedMovement.y, dampedMovement.x, dampedMovement.x));
-            currentLinearBob = Vector3.Lerp(currentLinearBob, (timeLinear.ScaleReturn(linearBobMultiplier) + movementAddPos) * (moveInputSize + stationaryBobPower), delta * linearBobLerpSpeed) * focuslerp;
-            currentAngularBob = Vector3.Lerp(currentAngularBob, (timeAngular.ScaleReturn(angularBobMultiplier) + movementAddRot) * (moveInputSize + stationaryBobPower), delta * angularBobLerpSpeed) * focuslerp;
+            movementAddRot = moveBasedRotationAdditive.ScaleReturn(new Vector3(dampedMovement.y, dampedMovement.x, dampedMovement.x) );
+            currentLinearBob = Vector3.Lerp(currentLinearBob, (timeLinear.ScaleReturn(linearBobMultiplier) + movementAddPos) * movingBobScaleLerp, delta * linearBobLerpSpeed) * focuslerp;
+            currentAngularBob = Vector3.Lerp(currentAngularBob, (timeAngular.ScaleReturn(angularBobMultiplier) + movementAddRot) * movingBobAngularScaleLerp, delta * angularBobLerpSpeed ) * focuslerp;
         }
 
         void Movement()
@@ -164,7 +176,7 @@ namespace Starlight
             {
                 playerCam.m_Lens.FieldOfView = Mathf.Lerp(unfocusedFOV, focusedFOV, currentFocus);
             }
-            focusCameraReceiver.position = Vector3.Lerp(focusCameraReceiver.parent.position, focusCameraTarget.position, currentFocus);
+            focusCameraReceiver.position = Vector3.Lerp(focusCameraReceiver.parent.position, focusCameraTarget.position - focusCameraTarget.rotation * (currentLinearBob * cameraBobMultiplier), currentFocus);
         }
 
         void ArmsBobbingLerp()
@@ -238,14 +250,12 @@ namespace Starlight
         public void GetFocusInput(InputAction.CallbackContext context)
         {
             focusInput = context.ReadValue<float>() > 0.3f;
-
+        }
+        public void GetSwitchInput(InputAction.CallbackContext context)
+        {
             if (context.performed)
             {
-                animator.CrossFade("ADS", 1 / (focusSpeed * focusInAnimationSpeedMultiplier), 0, animator.GetCurrentAnimatorStateInfo(0).normalizedTime, currentFocus);
-            }
-            else if(context.canceled)
-            {
-                animator.CrossFade("Idle", 1 / (focusSpeed * focusOutAnimationSpeedMultiplier), 0, animator.GetCurrentAnimatorStateInfo(0).normalizedTime, 1 - currentFocus);
+                animator.CrossFade("Unequip", 0.2f);
             }
         }
     }

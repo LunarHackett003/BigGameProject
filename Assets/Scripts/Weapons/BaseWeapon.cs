@@ -1,10 +1,13 @@
+using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.VFX;
 
 namespace Starlight.Weapons
 {
+    [SaveDuringPlay]
     public class BaseWeapon : MonoBehaviour, IManagedBehaviour
     {
         private void Awake()
@@ -40,14 +43,25 @@ namespace Starlight.Weapons
         public ParticleSystem muzzleFlash;
         public VisualEffect vfxMuzzleFlash;
 
-        CharacterMotor cm;
-        public CharacterMotor CM {  get { return cm; } }
-        public float CM_Focus { get { return cm.Focus; } }
+        [SerializeField] internal Vector3 linearBobSpeed, angularBobSpeed;
+        [SerializeField] internal Vector3 linearBobMultiplier, angularBobMultiplier;
+        [SerializeField] internal float recoilLerpSpeed;
+        [SerializeField] internal float recoilDecay;
+        [SerializeField] internal float idleBobLerpSpeedLinear, idleBobLerpSpeedAngular, movingBobLerpSpeedLinear, movingBobLerpSpeedAngular, idleBobLerpScaleLinear, movingBobLerpScaleLinear, idleBobLerpScaleAngular, movingBobLerpScaleAngular;
+        [SerializeField] internal float bobFocusMultiplier;
+        internal CharacterMotor cm;
+        internal CharacterMotor CM {  get { return cm; } }
+        internal float CM_Focus { get { return cm.Focus; } }
+        [SerializeField] float adsSpeed;
+        internal float FocusSpeed { get { return adsSpeed; } }
+        [SerializeField] internal Transform focusTransform;
         [SerializeField] MinMaxVector3 linearRecoilMinMax, angularRecoilMinMax;
         [SerializeField] Vector3 linearRecoilMin, linearRecoilMax, angularRecoilMin, angularRecoilMax;
+
+        [SerializeField] internal UnityEvent fireEvent, reloadEvent;
         public virtual void ManagedFixedUpdate()
         {
-            canFire = !fireDelay;
+            canFire = !fireDelay && !firing;
             if (fireInput && !fireBlocked)
             {
                 if (canFire)
@@ -92,6 +106,7 @@ namespace Starlight.Weapons
         {
             WaitForFixedUpdate wff = new();
             wfs = new(postFireDelayTime);
+            firing = true;
             for (int i = 0; i < burstCount; i++)
             {
                 Fire();
@@ -108,6 +123,8 @@ namespace Starlight.Weapons
 
         void Fire()
         {
+            timesFired++;
+            cm.GetAnimator.Play("Fire", 0, 0);
             if (useVFXGraph && vfxMuzzleFlash)
             {
                 vfxMuzzleFlash.Play();
@@ -177,6 +194,11 @@ namespace Starlight.Weapons
                 min = angularRecoilMin,
                 max = angularRecoilMax
             };
+            if (cm)
+            {
+                cm.wm.SetVariables();
+            }
         }
+        
     }
 }
