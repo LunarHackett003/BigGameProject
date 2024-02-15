@@ -16,7 +16,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &5751687051114489314
 Transform:
   m_ObjectHideFlags: 0
@@ -78,6 +78,15 @@ MonoBehaviour:
   linearRecoilMax: {x: 0.05, y: -0.01, z: -0.01}
   angularRecoilMin: {x: -10, y: -4, z: -4}
   angularRecoilMax: {x: -4, y: 4, z: 4}
+  projectile: {fileID: 0}
+  bulletObject: {fileID: 7540399137317300774, guid: 4bc1856dd5d3b95428b94a3f7f65c339,
+    type: 3}
+  fireFromPosition: {fileID: 1154944927496440822}
+  bulletSpeed: 680
+  bulletLifetime: 10
+  bulletGravity: 1
+  bulletMaxDamage: 130
+  bulletMinDamage: 50
   fireEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -159,14 +168,14 @@ Camera:
   serializedVersion: 2
   m_ClearFlags: 1
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
-  m_projectionMatrixMode: 1
+  m_projectionMatrixMode: 2
   m_GateFitMode: 2
   m_FOVAxisMode: 0
   m_Iso: 200
   m_ShutterSpeed: 0.005
   m_Aperture: 16
   m_FocusDistance: 10
-  m_FocalLength: 50
+  m_FocalLength: 20.78461
   m_BladeCount: 5
   m_Curvature: {x: 2, y: 11}
   m_BarrelClipping: 0.25
@@ -181,7 +190,7 @@ Camera:
     height: 1
   near clip plane: 0.01
   far clip plane: 1000
-  field of view: 60
+  field of view: 60.000004
   orthographic: 0
   orthographic size: 5
   m_Depth: -100

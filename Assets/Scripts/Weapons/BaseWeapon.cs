@@ -4,12 +4,102 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.VFX;
-
+using Starlight.Weapons.Animation;
 namespace Starlight.Weapons
 {
     [SaveDuringPlay]
     public class BaseWeapon : MonoBehaviour, IManagedBehaviour
     {
+        [System.Serializable]
+        public class RaycastBullet
+        {
+            public RaycastBullet(Vector3 startPos, float speed, Vector3 direction, float lifetime, float gravity, Transform bulletObject, float maxDamage, float minDamage, Vector3 objectStartPosition)
+            {
+                Debug.DrawRay(startPos, direction * speed);
+                lastPos = startPos;
+                this.speed = speed;
+                this.direction = direction.normalized;
+                lifetimeRemaining = lifetime;
+                this.gravity = gravity;
+                this.bulletObject = bulletObject;
+                this.minDamage = minDamage;
+                this.maxDamage = maxDamage;
+                this.bulletObject.position = objectStartPosition;
+                velocity = direction * speed * Time.fixedDeltaTime;
+                nextPos = lastPos + velocity;
+            }
+
+            Vector3 lastPos;
+            Vector3 nextPos;
+            internal float speed;
+            Vector3 direction;
+            Vector3 velocity;
+            float gravity;
+            float lifetimeRemaining;
+            Transform bulletObject;
+            GameObject impactEffect;
+            float maxDamage, minDamage;
+            public float Lifetime { get { return lifetimeRemaining; } }
+            public void UpdateBullet()
+            {
+                float deltaTime = Time.fixedDeltaTime;
+                Debug.Log("updating a bullet!");
+                velocity += Time.fixedDeltaTime * gravity * Physics.gravity;
+                nextPos += velocity;
+                Ray r = new()
+                {
+                    origin = lastPos,
+                    direction = velocity.normalized
+                };
+                if (Physics.Raycast(r, out RaycastHit hit, speed * deltaTime, WeaponConstants.instance.bulletLayermask))
+                {
+                    Debug.DrawRay(r.origin, velocity, Color.green, WeaponConstants.instance.bulletDebugRayTime, false);
+                    lifetimeRemaining = 0;
+                    if (impactEffect)
+                    {
+                        GameObject go = Object.Instantiate(impactEffect, hit.point, Quaternion.identity);
+                        go.transform.up = hit.normal;
+                        Object.Destroy(go, 10);
+                    }
+                    nextPos = hit.point;
+                    TerminateBullet();
+                }
+                else
+                {
+                    Debug.DrawRay(r.origin, velocity, Color.red, WeaponConstants.instance.bulletDebugRayTime, false);
+                    lifetimeRemaining -= deltaTime;
+                }
+                lastPos = nextPos;
+            }
+            internal void TerminateBullet()
+            {
+                if (bulletObject)
+                {
+                    bulletObject.position = nextPos;
+                    Destroy(bulletObject.gameObject, 1f);
+                }
+            }
+            internal IEnumerator BulletLerp()
+            {
+                if (bulletObject)
+                {
+                    var w = new WaitForEndOfFrame();
+                    while (lifetimeRemaining > 0)
+                    {
+                        bulletObject.position = Vector3.Lerp(lastPos, nextPos, Time.smoothDeltaTime * speed);
+                        yield return w;
+                    }
+                }
+                else
+                {
+
+                }
+            }
+            internal void SetBulletPosition()
+            {
+                bulletObject.position = nextPos;
+            }
+        }
         private void Awake()
         {
             BehaviourManager.Subscribe(ManagedUpdate, ManagedLateUpdate, ManagedFixedUpdate);
@@ -58,6 +148,11 @@ namespace Starlight.Weapons
         [SerializeField] MinMaxVector3 linearRecoilMinMax, angularRecoilMinMax;
         [SerializeField] Vector3 linearRecoilMin, linearRecoilMax, angularRecoilMin, angularRecoilMax;
 
+        [SerializeField, Header("Bullet/Projectile"), Tooltip("If there is a projectile specified, the gun will fire a projectile. Otherwise, a bullet will be fired.")] public GameObject projectile;
+        [SerializeField] public GameObject bulletObject;
+        [SerializeField, Tooltip("This is where a bullet will spawn its object at.")] Transform fireFromPosition;
+        [SerializeField] float bulletSpeed, bulletLifetime, bulletGravity, bulletMaxDamage,bulletMinDamage;
+
         [SerializeField] internal UnityEvent fireEvent, reloadEvent;
         public virtual void ManagedFixedUpdate()
         {
@@ -77,7 +172,6 @@ namespace Starlight.Weapons
                 }
             }
         }
-
         internal void PerformManualAction()
         {
             fireDelay = false;
@@ -120,7 +214,6 @@ namespace Starlight.Weapons
             firing = false;
             yield break;
         }
-
         void Fire()
         {
             timesFired++;
@@ -133,7 +226,23 @@ namespace Starlight.Weapons
             {
                 muzzleFlash.Play(true);
             }
+            //We're firing a projectile, so we don't want to shoot any bullets here
+            if (projectile)
+            {
+                GameObject go = Instantiate(projectile, cm.wm.fireTransform.position + cm.wm.fireTransform.forward * 0.4f, Quaternion.identity);
+                go.transform.forward = cm.wm.fireTransform.forward;
+                if(projectile.TryGetComponent<Projectile>(out var proj))
+                {
 
+                }
+                Destroy(go, bulletLifetime);
+            }
+            else
+            {
+                RaycastBullet b = new(cm.wm.fireTransform.position + (cm.wm.fireTransform.forward * 0.4f), bulletSpeed, cm.wm.fireTransform.forward,
+                    bulletLifetime, bulletGravity, Instantiate(bulletObject).transform, bulletMaxDamage, bulletMinDamage, fireFromPosition.position);
+                WeaponConstants.instance.AddBullet(b);
+            }
 
 
             if (cm)
@@ -201,4 +310,5 @@ namespace Starlight.Weapons
         }
         
     }
+
 }

@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using Starlight.Weapons.Animation;
 namespace Starlight.Weapons
 {
     public class WeaponManager : MonoBehaviour, IManagedBehaviour
@@ -14,6 +14,7 @@ namespace Starlight.Weapons
         [SerializeField] int weaponIndex;
         bool fireInput;
         protected AnimationClipOverrides clipOverrides;
+        [SerializeField] internal Transform fireTransform;
         private void Awake()
         {
             BehaviourManager.Subscribe(ManagedUpdate, ManagedLateUpdate, ManagedFixedUpdate);
