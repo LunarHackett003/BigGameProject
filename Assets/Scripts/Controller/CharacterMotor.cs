@@ -9,8 +9,6 @@ namespace Starlight
 {
     public class CharacterMotor : MonoBehaviour, IManagedBehaviour
     {
-
-
         [SerializeField] internal WeaponManager wm;
 
         [SerializeField] Transform aimRotationTransform;

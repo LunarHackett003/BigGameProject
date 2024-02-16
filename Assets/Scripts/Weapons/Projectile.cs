@@ -12,7 +12,7 @@ namespace Starlight.Weapons
         [SerializeField] float acceleration;
         [SerializeField] GameObject impactPrefab;
         [SerializeField] float gravityModifier;
-        private void Awake()
+        private void Start()
         {
             direction = transform.forward;
             rb.velocity = direction * startSpeed;
@@ -32,6 +32,7 @@ namespace Starlight.Weapons
         }
         private void OnCollisionEnter(Collision collision)
         {
+            Debug.Log($"{name} collided with {collision.gameObject.name}", collision.gameObject);
             Destroy(gameObject, 0.01f);
         }
         private void OnDestroy()

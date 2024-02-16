@@ -1,0 +1,104 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1167134102680481182
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7474535966261382010}
+  - component: {fileID: 2384050707549638970}
+  m_Layer: 7
+  m_Name: DudGun
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &7474535966261382010
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1167134102680481182}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2384050707549638970
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1167134102680481182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cee7a51651a21aa4187143d94b573b93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isDudGun: 1
+  animContainer: {fileID: 0}
+  postFireDelayTime: 0
+  preFireDelayTime: 0
+  burstCount: 0
+  timeBetweenBursts: 0
+  shotsBeforeManualAction: 0
+  manualAction: 0
+  gunshotSource: {fileID: 0}
+  gunShotClip: {fileID: 0}
+  useVFXGraph: 0
+  muzzleFlash: {fileID: 0}
+  vfxMuzzleFlash: {fileID: 0}
+  linearBobSpeed: {x: 0, y: 0, z: 0}
+  angularBobSpeed: {x: 0, y: 0, z: 0}
+  linearBobMultiplier: {x: 0, y: 0, z: 0}
+  angularBobMultiplier: {x: 0, y: 0, z: 0}
+  recoilLerpSpeed: 0
+  recoilDecay: 0
+  idleBobLerpSpeedLinear: 0
+  idleBobLerpSpeedAngular: 0
+  movingBobLerpSpeedLinear: 0
+  movingBobLerpSpeedAngular: 0
+  idleBobLerpScaleLinear: 0
+  movingBobLerpScaleLinear: 0
+  idleBobLerpScaleAngular: 0
+  movingBobLerpScaleAngular: 0
+  bobFocusMultiplier: 0
+  adsSpeed: 0
+  focusTransform: {fileID: 0}
+  linearRecoilMin: {x: 0, y: 0, z: 0}
+  linearRecoilMax: {x: 0, y: 0, z: 0}
+  angularRecoilMin: {x: 0, y: 0, z: 0}
+  angularRecoilMax: {x: 0, y: 0, z: 0}
+  projectile: {fileID: 0}
+  bulletObject: {fileID: 0}
+  fireFromPosition: {fileID: 0}
+  bulletSpeed: 0
+  bulletLifetime: 0
+  bulletGravity: 0
+  bulletMaxDamage: 0
+  bulletMinDamage: 0
+  baseSpread: {x: 0, y: 0}
+  hipFireSpread: {x: 0, y: 0}
+  spreadIncrement: 0
+  spreadDecay: 0
+  maxSpread: 0
+  currentSpread: 0
+  mustFocusToFire: 0
+  fireEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  reloadEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  bulletImpactEffect: {fileID: 0}
+  fireIterations: 0
+  hasOptic: 0

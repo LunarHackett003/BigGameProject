@@ -30,16 +30,18 @@ namespace Starlight.Weapons.Optics
 
         public void ManagedLateUpdate()
         {
-            bool viewable = bw.CM_Focus > 0.4f;
-            cam.enabled = viewable;
-            rend.enabled = viewable;
-            if (!useFixedUpdate && manualUpdate)
+            if (bw && bw.CM)
             {
-                crt.Update();
+                bool viewable = bw.CM_Focus > 0.4f;
+                cam.enabled = viewable;
+                rend.enabled = viewable;
+                if (!useFixedUpdate && manualUpdate)
+                {
+                    crt.Update();
+                }
+                cam.focalLength = defaultFocalLength * (baseZoomAmount * zoomLevel);
             }
-            cam.focalLength = defaultFocalLength * (baseZoomAmount * zoomLevel);
         }
-
         public void ManagedUpdate()
         {
         }
@@ -47,7 +49,7 @@ namespace Starlight.Weapons.Optics
         private void Awake()
         {
             BehaviourManager.Subscribe(ManagedUpdate, ManagedLateUpdate, ManagedFixedUpdate);
-            bw = GetComponentInParent<BaseWeapon>();
+            bw = GetComponentInParent<BaseWeapon>(true);
             CreateCRT();
             rend.material = new(mat)
             {
@@ -59,7 +61,21 @@ namespace Starlight.Weapons.Optics
         }
         private void OnEnable()
         {
-            bw.CM.SetZoomLevel(zoomLevel * baseZoomAmount);
+            if (bw && bw.cm)
+            {
+                bw.CM.SetZoomLevel(zoomLevel * baseZoomAmount);
+            }
+            else
+            {
+                bw = GetComponentInParent<BaseWeapon>(true);
+            }
+        }
+        private void OnDisable()
+        {
+            if (bw && bw.cm)
+            {
+                bw.cm.SetZoomLevel(1);
+            }
         }
         private void OnValidate()
         {

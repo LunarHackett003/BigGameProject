@@ -13,98 +13,78 @@ namespace Starlight.Weapons
         [System.Serializable]
         public class RaycastBullet
         {
-            public RaycastBullet(Vector3 startPos, float speed, Vector3 direction, float lifetime, float gravity, Transform bulletObject, float maxDamage, float minDamage, Vector3 objectStartPosition)
+            internal float Lifetime, startLifetime;
+            internal Vector3 startPosition, velocity;
+            internal float gravityModifier;
+            Vector3 pos;
+            Transform bulletObject;
+            float minDamage, maxDamage;
+            float maxDistance;
+            GameObject impactEffect;
+            internal RaycastBullet(float lifetime, Vector3 startPosition, Vector3 velocity, float gravityModifier, Transform bulletObject, float minDamage, float maxDamage, GameObject impactEffect = null)
             {
-                Debug.DrawRay(startPos, direction * speed);
-                lastPos = startPos;
-                this.speed = speed;
-                this.direction = direction.normalized;
-                lifetimeRemaining = lifetime;
-                this.gravity = gravity;
+                startLifetime = lifetime;
+                Lifetime = lifetime;
+                this.startPosition = startPosition;
+                this.velocity = velocity;
+                this.gravityModifier = gravityModifier;
                 this.bulletObject = bulletObject;
                 this.minDamage = minDamage;
                 this.maxDamage = maxDamage;
-                this.bulletObject.position = objectStartPosition;
-                velocity = direction * speed * Time.fixedDeltaTime;
-                nextPos = lastPos + velocity;
-            }
-
-            Vector3 lastPos;
-            Vector3 nextPos;
-            internal float speed;
-            Vector3 direction;
-            Vector3 velocity;
-            float gravity;
-            float lifetimeRemaining;
-            Transform bulletObject;
-            GameObject impactEffect;
-            float maxDamage, minDamage;
-            public float Lifetime { get { return lifetimeRemaining; } }
-            public void UpdateBullet()
-            {
-                float deltaTime = Time.fixedDeltaTime;
-                Debug.Log("updating a bullet!");
-                velocity += Time.fixedDeltaTime * gravity * Physics.gravity;
-                nextPos += velocity;
-                Ray r = new()
-                {
-                    origin = lastPos,
-                    direction = velocity.normalized
-                };
-                if (Physics.Raycast(r, out RaycastHit hit, speed * deltaTime, WeaponConstants.instance.bulletLayermask))
-                {
-                    Debug.DrawRay(r.origin, velocity, Color.green, WeaponConstants.instance.bulletDebugRayTime, false);
-                    lifetimeRemaining = 0;
-                    if (impactEffect)
-                    {
-                        GameObject go = Object.Instantiate(impactEffect, hit.point, Quaternion.identity);
-                        go.transform.up = hit.normal;
-                        Object.Destroy(go, 10);
-                    }
-                    nextPos = hit.point;
-                    TerminateBullet();
-                }
-                else
-                {
-                    Debug.DrawRay(r.origin, velocity, Color.red, WeaponConstants.instance.bulletDebugRayTime, false);
-                    lifetimeRemaining -= deltaTime;
-                }
-                lastPos = nextPos;
+                maxDistance = velocity.magnitude * Time.fixedDeltaTime;
+                pos = startPosition;
+                this.impactEffect = impactEffect;
             }
             internal void TerminateBullet()
             {
-                if (bulletObject)
+                Destroy(bulletObject.gameObject, 2f);
+
+            }
+            internal void BulletHit(RaycastHit hit)
+            {
+                TerminateBullet();
+                if (impactEffect)
                 {
-                    bulletObject.position = nextPos;
-                    Destroy(bulletObject.gameObject, 1f);
+                    var go = Instantiate(impactEffect, hit.point, Quaternion.identity);
+                    go.transform.up = hit.normal;
+                    Destroy(go, 10f);
                 }
             }
-            internal IEnumerator BulletLerp()
+            internal void UpdateBullet()
             {
-                if (bulletObject)
+                //Create a new ray
+                Ray r = new()
                 {
-                    var w = new WaitForEndOfFrame();
-                    while (lifetimeRemaining > 0)
-                    {
-                        bulletObject.position = Vector3.Lerp(lastPos, nextPos, Time.smoothDeltaTime * speed);
-                        yield return w;
-                    }
+                    origin = pos,
+                    direction = velocity
+                };
+                //perform the raycast
+                if (Physics.Raycast(r,out RaycastHit hit, maxDistance, WeaponConstants.instance.bulletLayermask))
+                {
+                    Debug.DrawRay(r.origin, r.direction, Color.green, WeaponConstants.instance.bulletDebugRayTime);
+                    Lifetime = 0;
+                    pos = hit.point;
+                    if (bulletObject)
+                        bulletObject.position = pos;
+                    BulletHit(hit);
                 }
                 else
                 {
-
+                    Debug.DrawRay(r.origin, r.direction, Color.red, WeaponConstants.instance.bulletDebugRayTime);
+                    Lifetime -= Time.fixedDeltaTime;
+                    pos += velocity * Time.fixedDeltaTime;
+                    velocity += Time.fixedDeltaTime * gravityModifier * Physics.gravity;
+                    if (bulletObject)
+                        bulletObject.position = pos;
                 }
-            }
-            internal void SetBulletPosition()
-            {
-                bulletObject.position = nextPos;
+
             }
         }
         private void Awake()
         {
             BehaviourManager.Subscribe(ManagedUpdate, ManagedLateUpdate, ManagedFixedUpdate);
             wfs = new(postFireDelayTime);
-            cm = GetComponentInParent<CharacterMotor>();
+            cm = GetComponentInParent<CharacterMotor>(true);
 
         }
 
@@ -152,15 +132,35 @@ namespace Starlight.Weapons
         [SerializeField] public GameObject bulletObject;
         [SerializeField, Tooltip("This is where a bullet will spawn its object at.")] Transform fireFromPosition;
         [SerializeField] float bulletSpeed, bulletLifetime, bulletGravity, bulletMaxDamage,bulletMinDamage;
-
+        [SerializeField] Vector2 baseSpread;
+        [SerializeField] Vector2 hipFireSpread;
+        [SerializeField] float spreadIncrement, spreadDecay, maxSpread, currentSpread;
+        [SerializeField] bool mustFocusToFire;
         [SerializeField] internal UnityEvent fireEvent, reloadEvent;
+        [SerializeField] GameObject bulletImpactEffect;
+        [SerializeField] internal int fireIterations;
+        [SerializeField] internal bool hasOptic;
+
+        [SerializeField] internal AnimationCurve damageCurve;
+        [SerializeField] internal float ricochetDotThreshold;
+        [SerializeField] internal float maxRandomAngleForRicochet;
+        [SerializeField, Range(0, 1)] internal float ricochetChance;
+        [SerializeField, Range(0, 1)] internal float penetrateChance;
+        [SerializeField] internal float penetrateDotThreshold;
+        [SerializeField] internal float penetrateMaxThickness;
+        [SerializeField] internal int maxPenetrateTries;
+        [SerializeField] internal float damageMultiplierPerPenetration;
         public virtual void ManagedFixedUpdate()
         {
             canFire = !fireDelay && !firing;
+            currentSpread = Mathf.Clamp(currentSpread -= Time.fixedDeltaTime * spreadDecay, 0, maxSpread);
+            if (mustFocusToFire & CM_Focus < 1)
+                return;
             if (fireInput && !fireBlocked)
             {
                 if (canFire)
                 {
+
                     if(preFireDelayTime > 0 && !firing)
                     {
                         StartCoroutine(PreFireDelay());
@@ -193,7 +193,7 @@ namespace Starlight.Weapons
             }
             else
             {
-                Fire();
+                Fire(cm.wm.fireTransform.position, maxPenetrateTries);
             }
         }
         IEnumerator BurstFire()
@@ -203,7 +203,7 @@ namespace Starlight.Weapons
             firing = true;
             for (int i = 0; i < burstCount; i++)
             {
-                Fire();
+                Fire(cm.wm.fireTransform.position, maxPenetrateTries);
                 yield return wfs;
             }
             yield return new WaitForSeconds(timeBetweenBursts);
@@ -214,51 +214,155 @@ namespace Starlight.Weapons
             firing = false;
             yield break;
         }
-        void Fire()
+        /// <summary>
+        /// Fires a hitscan bullet
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="direction"></param>
+        /// <param name="penetrateTriesLeft"></param>
+        /// <param name="hasRicocheted"></param>
+        /// <returns>Position hit by the bullet</returns>
+        protected Vector3 Fire(Vector3 point, int penetrateTriesLeft, bool hasRicocheted = false)
         {
-            timesFired++;
-            cm.GetAnimator.Play("Fire", 0, 0);
-            if (useVFXGraph && vfxMuzzleFlash)
+
+            cm.GetAnimator.Play("Fire", -1, 0);
+            cm.ReceiveRecoilImpulse(linearRecoilMinMax, angularRecoilMinMax);
+            Transform t = cm.wm.fireTransform;
+            for (int i = 0; i < fireIterations; i++)
             {
-                vfxMuzzleFlash.Play();
+                Vector3 direction = GetSpread(t).normalized;
+                currentSpread += spreadIncrement / fireIterations;
+                if (projectile)
+                {
+                    var go = Instantiate(projectile, fireFromPosition.position, Quaternion.identity);
+                    go.transform.forward = cm.wm.fireTransform.forward;
+                    Destroy(go, bulletLifetime);
+                }
+                else
+                {
+                    BulletTracer newTracer = Instantiate(bulletObject, fireFromPosition.position, Quaternion.identity).GetComponent<BulletTracer>();
+                    newTracer.bulletSpeed = bulletSpeed;
+                    int currentPenetrateTries = penetrateTriesLeft;
+                    bool ricocheted = false;
+                    if (Physics.Raycast(point, direction, out RaycastHit hit, bulletSpeed, WeaponConstants.instance.bulletLayermask))
+                    {
+                        Debug.DrawLine(point, hit.point, Color.green, 0.3f);
+                        if (hit.collider.attachedRigidbody)
+                        {
+
+                        }
+                        float dot = Vector3.Dot(hit.normal, direction) * -1;
+                        if (!hasRicocheted)
+                        {
+                            if (ricochetDotThreshold != 0 && dot < ricochetDotThreshold)
+                            {
+                                if (Random.value < ricochetChance)
+                                {
+                                    Fire(hit.point, Vector3.Reflect(direction, hit.normal), penetrateTriesLeft, newTracer, true);
+                                    ricocheted = true;
+                                }
+                            }
+                        }
+                        if (currentPenetrateTries > 0 && dot > penetrateDotThreshold && !(ricocheted || hasRicocheted))
+                        {
+                            Vector3 penetratePoint = CanPenetrate(hit.point, direction);
+                            if (penetratePoint != Vector3.zero)
+                            {
+                                if (Random.value < penetrateChance)
+                                {
+                                    currentPenetrateTries--;
+                                    Fire(penetratePoint, direction, currentPenetrateTries, newTracer, true);
+                                }
+                            }
+                        }
+                    }
+                    else
+                        Debug.DrawRay(point, direction * bulletSpeed, Color.red, 0.3f);
+                    Vector3 endPos = hit.collider ? hit.point : point + (direction * bulletSpeed);
+                    newTracer.AddPosition(endPos);
+                }
             }
-            else if (muzzleFlash)
+                return Vector3.zero;
+        }
+        /// <summary>
+        /// Fire method for ricocheting/penetrating bullets
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="direction"></param>
+        /// <param name="penetrateTriesLeft"></param>
+        /// <param name="hasRicocheted"></param>
+        /// <returns></returns>
+        protected Vector3 Fire(Vector3 point, Vector3 direction, int penetrateTriesLeft, BulletTracer tracer, bool hasRicocheted = false)
+        {
+            int currentPenetrateTries = penetrateTriesLeft;
+            bool ricocheted = false;
+            if (Physics.Raycast(point, direction, out RaycastHit hit, bulletSpeed, WeaponConstants.instance.bulletLayermask))
             {
-                muzzleFlash.Play(true);
-            }
-            //We're firing a projectile, so we don't want to shoot any bullets here
-            if (projectile)
-            {
-                GameObject go = Instantiate(projectile, cm.wm.fireTransform.position + cm.wm.fireTransform.forward * 0.4f, Quaternion.identity);
-                go.transform.forward = cm.wm.fireTransform.forward;
-                if(projectile.TryGetComponent<Projectile>(out var proj))
+                Debug.DrawLine(point, hit.point, Color.green, 0.3f);
+                if (hit.collider.attachedRigidbody)
                 {
 
                 }
-                Destroy(go, bulletLifetime);
+                float dot = Vector3.Dot(hit.normal, direction) * -1;
+                if (!hasRicocheted)
+                {
+                    if (ricochetDotThreshold != 0 && dot < ricochetDotThreshold)
+                    {
+                        if (Random.value < ricochetChance)
+                        {
+                            Fire(hit.point, Vector3.Reflect(direction, hit.normal), penetrateTriesLeft, tracer, true);
+                            ricocheted = true;
+                        }
+                    }
+                }
+                if (currentPenetrateTries > 0 && dot > penetrateDotThreshold && !(ricocheted || hasRicocheted))
+                {
+                    Vector3 penetratePoint = CanPenetrate(hit.point, direction);
+                    if (penetratePoint != Vector3.zero)
+                    {
+                        if (Random.value < penetrateChance)
+                        {
+                            currentPenetrateTries--;
+                            Fire(penetratePoint, direction, currentPenetrateTries, tracer, true);
+                        }
+                    }
+                }
             }
             else
-            {
-                RaycastBullet b = new(cm.wm.fireTransform.position + (cm.wm.fireTransform.forward * 0.4f), bulletSpeed, cm.wm.fireTransform.forward,
-                    bulletLifetime, bulletGravity, Instantiate(bulletObject).transform, bulletMaxDamage, bulletMinDamage, fireFromPosition.position);
-                WeaponConstants.instance.AddBullet(b);
-            }
-
-
-            if (cm)
-            {
-                cm.ReceiveRecoilImpulse(linearRecoilMinMax, angularRecoilMinMax);
-            }
-            if (manualAction && timesFired >= shotsBeforeManualAction)
-            {
-                Debug.Log("Waiting for manual action!");
-                fireDelay = true;
-            }
-            else
-            {
-                StartCoroutine(PostFireDelay());
-            }
+                Debug.DrawRay(point, direction * bulletSpeed, Color.red, 0.3f);
+            Vector3 endPos = hit.collider ? hit.point : point + (direction * bulletSpeed);
+            tracer.AddPosition(endPos);
+            return endPos;
         }
+        Vector3 CanPenetrate(Vector3 impact, Vector3 direction)
+        {
+            Vector3 rayfirepos = impact + (direction * penetrateMaxThickness);
+            if (Physics.Raycast(rayfirepos, -direction, out RaycastHit hit, penetrateMaxThickness, WeaponConstants.instance.bulletLayermask))
+            {
+
+                Debug.DrawRay(rayfirepos, direction, Color.green, 0.5f);
+                return hit.point;
+
+            }
+            else
+                Debug.DrawRay(rayfirepos, direction, Color.red, 0.5f);
+            return Vector3.zero;
+        }
+
+        Vector3 SpreadVector(Vector3 vec)
+        {
+            Vector3 vecOut = Vector3.zero;
+            vecOut.x = Random.Range(-vec.x, vec.x);
+            vecOut.y = Random.Range(-vec.y, vec.y);
+            return vecOut + Vector3.forward;
+        }
+        Vector3 GetSpread(Transform t)
+        {
+            Vector3 spreadDirection = t.TransformDirection(SpreadVector(baseSpread) + Vector3.forward * bulletSpeed);
+            Vector3 addSpread = t.TransformDirection(SpreadVector(hipFireSpread * currentSpread) + Vector3.forward * bulletSpeed) * (1 - CM_Focus);
+            return spreadDirection + addSpread;
+        }
+
         IEnumerator PostFireDelay()
         {
             wfs = new(postFireDelayTime);

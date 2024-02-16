@@ -9,8 +9,8 @@ namespace Starlight.Weapons
         CharacterMotor cm;
         Animator animator;
         AnimatorOverrideController aoc;
-        [SerializeField] List<BaseWeapon> weapons;
-        internal BaseWeapon CurrentWeapon { get { return weapons[weaponIndex]; } }
+        [SerializeField] internal BaseWeapon dudGun, primaryWeapon, secondaryWeapon;
+        internal BaseWeapon CurrentWeapon;
         [SerializeField] int weaponIndex;
         bool fireInput;
         protected AnimationClipOverrides clipOverrides;
@@ -30,18 +30,16 @@ namespace Starlight.Weapons
             clipOverrides = new AnimationClipOverrides(aoc.overridesCount);
             aoc.GetOverrides(clipOverrides);
 
+            primaryWeapon.gameObject.SetActive(true);
+            secondaryWeapon.gameObject.SetActive(false);
+            CurrentWeapon = primaryWeapon;
 
-            for (int i = 0; i < weapons.Count; i++)
-            {
-                weapons[i].gameObject.SetActive(false);
-            }
-            weapons[weaponIndex].gameObject.SetActive(true);
-            SetVariables();
         }
         private void Start()
         {
             //Now we call SetAnimations() in order to actually set those clips.
             SetAnimations();
+            SetVariables();
         }
         internal void SetFireInput(bool fireInput)
         {
@@ -54,10 +52,8 @@ namespace Starlight.Weapons
 
         public void ManagedLateUpdate()
         {
-            if (weapons[weaponIndex])
-            {
-                weapons[weaponIndex].SetFireInput(fireInput);
-            }
+            if(CurrentWeapon)
+                CurrentWeapon.SetFireInput(fireInput);
         }
         public void ManagedUpdate()
         {
@@ -65,10 +61,13 @@ namespace Starlight.Weapons
         }
         internal void SwitchWeapon()
         {
-            weapons[weaponIndex].gameObject.SetActive(false);
-            weaponIndex++;
-            weaponIndex %= weapons.Count;
-            weapons[weaponIndex].gameObject.SetActive(true);
+            Debug.Log("switching weapons");
+            //weapons[weaponIndex].gameObject.SetActive(false);
+            //weaponIndex = weaponIndex >= weapons.Length-1 ? 0 : weaponIndex + 1;
+            //weapons[weaponIndex].gameObject.SetActive(true);
+            CurrentWeapon.gameObject.SetActive(false);
+            CurrentWeapon = CurrentWeapon == primaryWeapon? secondaryWeapon : primaryWeapon;
+            CurrentWeapon.gameObject.SetActive(true);
             SetAnimations();
             SetVariables();
         }
@@ -91,6 +90,10 @@ namespace Starlight.Weapons
             cm.idleBobLerpScaleLinear = CurrentWeapon.idleBobLerpScaleLinear;
             cm.idleBobLerpScaleAngular = CurrentWeapon.idleBobLerpScaleAngular;
             cm.bobFocusMultiplier = CurrentWeapon.bobFocusMultiplier;
+            if (!CurrentWeapon.hasOptic)
+            {
+                cm.SetZoomLevel(1);
+            }
         }
         internal void SetAnimations()
         {
